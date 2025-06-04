@@ -20,24 +20,25 @@ interface TimeSlot {
 const BookingInterface = () => {
   const [selectedSlots, setSelectedSlots] = useState<SelectedSlot[]>([
     {
-      date: new Date(2025, 4, 1), // May 1, 2025
-      time: "13:00",
-      dateString: "May 1, 2025"
+      date: new Date(2025, 5, 26), // June 26, 2025
+      time: "16:00",
+      dateString: "June 26, 2025"
     },
     {
-      date: new Date(2025, 4, 8), // May 8, 2025
-      time: "17:00",
-      dateString: "May 8, 2025"
-    },
-    {
-      date: new Date(2025, 4, 15), // May 15, 2025
+      date: new Date(2025, 5, 19), // June 19, 2025
       time: "9:00",
-      dateString: "May 15, 2025"
+      dateString: "June 19, 2025"
+    },
+    {
+      date: new Date(2025, 5, 12), // June 12, 2025
+      time: "20:00",
+      dateString: "June 12, 2025"
     }
   ]);
   
   const [currentDate, setCurrentDate] = useState(new Date(2025, 4, 1)); // May 2025
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date(2025, 0, 15)); // January 15, 2025 for time display
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date(2025, 5, 19)); // June 19, 2025 for time display
+  const [focusedDate, setFocusedDate] = useState<Date | null>(new Date(2025, 4, 4)); // May 4, 2025 with blue ring
   
   const maxSlots = 3;
   const remainingSlots = maxSlots - selectedSlots.length;
@@ -76,6 +77,13 @@ const BookingInterface = () => {
     );
   };
 
+  const isDateFocused = (date: Date) => {
+    if (!focusedDate) return false;
+    return focusedDate.getDate() === date.getDate() && 
+           focusedDate.getMonth() === date.getMonth() &&
+           focusedDate.getFullYear() === date.getFullYear();
+  };
+
   const getSelectedTimeForDate = (date: Date) => {
     const slot = selectedSlots.find(slot => 
       slot.date.getDate() === date.getDate() && 
@@ -88,6 +96,17 @@ const BookingInterface = () => {
   const handleDateClick = (date: Date) => {
     if (isDateDisabled(date)) return;
     setSelectedDate(new Date(date));
+    setFocusedDate(null); // Clear focus when clicking
+  };
+
+  const handleDateHover = (date: Date) => {
+    if (!isDateDisabled(date) && !isDateSelected(date)) {
+      setFocusedDate(new Date(date));
+    }
+  };
+
+  const handleDateLeave = () => {
+    setFocusedDate(null);
   };
 
   const handleTimeSelect = (time: string) => {
@@ -118,6 +137,7 @@ const BookingInterface = () => {
 
   const clearSlots = () => {
     setSelectedSlots([]);
+    setFocusedDate(new Date(2025, 4, 4)); // Reset focus to May 4th
   };
 
   const saveSlots = () => {
@@ -170,6 +190,7 @@ const BookingInterface = () => {
           {days.map((day, index) => {
             const isCurrentMonth = day.getMonth() === month;
             const isSelected = isDateSelected(day);
+            const isFocused = isDateFocused(day);
             const isDisabled = isDateDisabled(day);
             const isToday = day.toDateString() === new Date().toDateString();
 
@@ -177,14 +198,17 @@ const BookingInterface = () => {
               <button
                 key={index}
                 onClick={() => handleDateClick(day)}
+                onMouseEnter={() => handleDateHover(day)}
+                onMouseLeave={handleDateLeave}
                 disabled={isDisabled}
                 className={`
                   p-2 text-sm rounded-full aspect-square flex items-center justify-center
-                  transition-all duration-200 hover:bg-gray-100 font-medium
+                  transition-all duration-200 hover:bg-gray-100 font-medium relative
                   ${!isCurrentMonth ? 'text-gray-300' : 'text-black'}
                   ${isSelected ? 'bg-black text-white hover:bg-gray-800' : ''}
                   ${isDisabled ? 'text-gray-300 cursor-not-allowed hover:bg-transparent' : ''}
                   ${isToday && !isSelected ? 'ring-2 ring-blue-500' : ''}
+                  ${isFocused && !isSelected ? 'ring-2 ring-blue-400' : ''}
                 `}
               >
                 {day.getDate()}
@@ -210,8 +234,10 @@ const BookingInterface = () => {
               <div>
                 <h1 className="text-2xl font-bold text-black mb-2">3x 9:16's to TT & IG</h1>
                 <p className="text-gray-600 text-sm">
-                  {selectedSlots.length} slot{selectedSlots.length !== 1 ? 's' : ''} selected - 
-                  {remainingSlots > 0 ? ` select ${remainingSlots} more slot${remainingSlots !== 1 ? 's' : ''}` : ' all slots selected'}
+                  {selectedSlots.length === maxSlots 
+                    ? `${selectedSlots.length} slots selected - all slots selected`
+                    : `${selectedSlots.length} slot${selectedSlots.length !== 1 ? 's' : ''} selected - select ${remainingSlots} more slot${remainingSlots !== 1 ? 's' : ''}`
+                  }
                 </p>
               </div>
               <div className="text-right text-sm text-gray-600">
