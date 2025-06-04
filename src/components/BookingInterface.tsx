@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState } from 'react';
@@ -97,6 +96,28 @@ const BookingInterface = () => {
     if (isDateDisabled(date)) return;
     setSelectedDate(new Date(date));
     setFocusedDate(null); // Clear focus when clicking
+  };
+
+  const handleDateDoubleClick = (date: Date) => {
+    if (isDateDisabled(date)) return;
+    
+    // If the date is selected, remove it from selectedSlots
+    if (isDateSelected(date)) {
+      const newSlots = selectedSlots.filter(slot => 
+        !(slot.date.getDate() === date.getDate() && 
+          slot.date.getMonth() === date.getMonth() &&
+          slot.date.getFullYear() === date.getFullYear())
+      );
+      setSelectedSlots(newSlots);
+      
+      // If we just deselected the currently viewed date, clear the selected date
+      if (selectedDate && 
+          selectedDate.getDate() === date.getDate() && 
+          selectedDate.getMonth() === date.getMonth() &&
+          selectedDate.getFullYear() === date.getFullYear()) {
+        setSelectedDate(null);
+      }
+    }
   };
 
   const handleDateHover = (date: Date) => {
@@ -198,6 +219,7 @@ const BookingInterface = () => {
               <button
                 key={index}
                 onClick={() => handleDateClick(day)}
+                onDoubleClick={() => handleDateDoubleClick(day)}
                 onMouseEnter={() => handleDateHover(day)}
                 onMouseLeave={handleDateLeave}
                 disabled={isDisabled}
