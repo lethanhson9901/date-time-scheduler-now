@@ -23,11 +23,21 @@ const BookingInterface = () => {
       date: new Date(2025, 4, 1), // May 1, 2025
       time: "13:00",
       dateString: "May 1, 2025"
+    },
+    {
+      date: new Date(2025, 4, 8), // May 8, 2025
+      time: "17:00",
+      dateString: "May 8, 2025"
+    },
+    {
+      date: new Date(2025, 4, 15), // May 15, 2025
+      time: "9:00",
+      dateString: "May 15, 2025"
     }
   ]);
   
   const [currentDate, setCurrentDate] = useState(new Date(2025, 4, 1)); // May 2025
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date(2025, 4, 15)); // May 15, 2025
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date(2025, 0, 15)); // January 15, 2025 for time display
   
   const maxSlots = 3;
   const remainingSlots = maxSlots - selectedSlots.length;
@@ -77,7 +87,7 @@ const BookingInterface = () => {
 
   const handleDateClick = (date: Date) => {
     if (isDateDisabled(date)) return;
-    setSelectedDate(date);
+    setSelectedDate(new Date(date));
   };
 
   const handleTimeSelect = (time: string) => {
@@ -90,7 +100,7 @@ const BookingInterface = () => {
     );
 
     const newSlot: SelectedSlot = {
-      date: selectedDate,
+      date: new Date(selectedDate),
       time,
       dateString: formatDateString(selectedDate)
     };
@@ -108,7 +118,6 @@ const BookingInterface = () => {
 
   const clearSlots = () => {
     setSelectedSlots([]);
-    setSelectedDate(null);
   };
 
   const saveSlots = () => {
@@ -147,12 +156,12 @@ const BookingInterface = () => {
 
     return (
       <div className="flex-1">
-        <h3 className="text-center font-medium mb-4">
+        <h3 className="text-center font-medium mb-4 text-black">
           {monthNames[month]} {year}
         </h3>
         <div className="grid grid-cols-7 gap-1 mb-2">
           {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
-            <div key={day} className="text-center text-sm text-gray-500 p-2">
+            <div key={day} className="text-center text-sm text-gray-500 p-2 font-medium">
               {day}
             </div>
           ))}
@@ -171,12 +180,11 @@ const BookingInterface = () => {
                 disabled={isDisabled}
                 className={`
                   p-2 text-sm rounded-full aspect-square flex items-center justify-center
-                  transition-all duration-200 hover:bg-gray-100
-                  ${!isCurrentMonth ? 'text-gray-300' : ''}
+                  transition-all duration-200 hover:bg-gray-100 font-medium
+                  ${!isCurrentMonth ? 'text-gray-300' : 'text-black'}
                   ${isSelected ? 'bg-black text-white hover:bg-gray-800' : ''}
                   ${isDisabled ? 'text-gray-300 cursor-not-allowed hover:bg-transparent' : ''}
                   ${isToday && !isSelected ? 'ring-2 ring-blue-500' : ''}
-                  ${selectedDate && day.toDateString() === selectedDate.toDateString() && !isSelected ? 'bg-blue-50 text-blue-600' : ''}
                 `}
               >
                 {day.getDate()}
@@ -192,15 +200,15 @@ const BookingInterface = () => {
   const selectedTime = selectedDate ? getSelectedTimeForDate(selectedDate) : null;
 
   return (
-    <Card className="max-w-6xl mx-auto p-6 bg-white rounded-lg border border-gray-200">
-      <div className="flex gap-8">
+    <Card className="max-w-6xl mx-auto p-8 bg-white rounded-lg border border-gray-200">
+      <div className="flex gap-12">
         {/* Left Pane - Date Selection */}
         <div className="flex-1">
           {/* Header */}
-          <div className="mb-6">
-            <div className="flex justify-between items-start mb-2">
+          <div className="mb-8">
+            <div className="flex justify-between items-start mb-4">
               <div>
-                <h1 className="text-2xl font-bold text-black">3x 9:16's to TT & IG</h1>
+                <h1 className="text-2xl font-bold text-black mb-2">3x 9:16's to TT & IG</h1>
                 <p className="text-gray-600 text-sm">
                   {selectedSlots.length} slot{selectedSlots.length !== 1 ? 's' : ''} selected - 
                   {remainingSlots > 0 ? ` select ${remainingSlots} more slot${remainingSlots !== 1 ? 's' : ''}` : ' all slots selected'}
@@ -218,26 +226,24 @@ const BookingInterface = () => {
           </div>
 
           {/* Calendar Navigation */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-6">
             <button
               onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
-              className="p-1 hover:bg-gray-100 rounded"
+              className="p-2 hover:bg-gray-100 rounded-md transition-colors"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-5 w-5" />
             </button>
-            <div className="flex gap-8">
-              {/* Two months side by side */}
-            </div>
+            <div className="flex-1" />
             <button
               onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
-              className="p-1 hover:bg-gray-100 rounded"
+              className="p-2 hover:bg-gray-100 rounded-md transition-colors"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-5 w-5" />
             </button>
           </div>
 
           {/* Calendars */}
-          <div className="flex gap-8 mb-8">
+          <div className="flex gap-12 mb-12">
             {renderCalendar(currentDate.getMonth(), currentDate.getFullYear())}
             {renderCalendar(currentDate.getMonth() + 1, currentDate.getFullYear())}
           </div>
@@ -246,13 +252,13 @@ const BookingInterface = () => {
           <div className="flex justify-between items-center">
             <button
               onClick={clearSlots}
-              className="text-black underline hover:no-underline text-sm"
+              className="text-black underline hover:no-underline text-sm transition-all"
             >
               Clear slots
             </button>
             <Button
               onClick={saveSlots}
-              className="bg-black text-white hover:bg-gray-800 px-6"
+              className="bg-black text-white hover:bg-gray-800 px-8 py-3 text-sm font-medium"
               disabled={selectedSlots.length !== maxSlots}
             >
               Save Slots
@@ -261,9 +267,9 @@ const BookingInterface = () => {
         </div>
 
         {/* Right Pane - Time Availability */}
-        <div className="w-80">
+        <div className="w-72">
           <div className="mb-6">
-            <h2 className="text-xl font-bold text-black mb-1">9:16 availabilities</h2>
+            <h2 className="text-xl font-bold text-black mb-2">9:16 availabilities</h2>
             <p className="text-gray-600 text-sm">
               {selectedDate ? formatDate(selectedDate) : 'Select a date'}
             </p>
@@ -277,16 +283,16 @@ const BookingInterface = () => {
                   onClick={() => slot.available && handleTimeSelect(slot.time)}
                   disabled={!slot.available}
                   className={`
-                    w-full p-4 rounded-lg border transition-all duration-200 text-center
+                    w-full p-4 rounded-lg border-2 transition-all duration-200 text-center
                     ${selectedTime === slot.time
-                      ? 'bg-blue-50 border-blue-300 text-blue-600'
+                      ? 'bg-blue-50 border-blue-400 text-blue-600'
                       : slot.available
-                        ? 'bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100 hover:border-blue-300'
-                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        ? 'bg-blue-50 border-blue-200 text-blue-600 hover:border-blue-300'
+                        : 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
                     }
                   `}
                 >
-                  <div className="font-medium">{slot.time}</div>
+                  <div className="font-medium text-base">{slot.time}</div>
                   {!slot.available && (
                     <div className="text-xs text-gray-400 mt-1">Not available</div>
                   )}
